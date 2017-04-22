@@ -23,7 +23,7 @@ var storage = {
         var data = '';
         var last = page * limit,
             first = last - limit;
-              
+
         this.orders.slice(first, last).forEach((order) => {
             data += JSON.stringify(order) + '\n';
         });
@@ -60,8 +60,24 @@ http.createServer(function(req, res) {
     req.on('data', function (chunk) {
         data += chunk;
     });
- 
-    if ((id = req.url.match('^/orders([?])page([=])([0-9]+)([&])limit([=])([0-9]+)'))) {
+
+     if ((id = req.url.match('^/orders$'))) {
+        if (req.method == 'GET') {
+            res.writeHead(
+                200, 
+                {
+                    'Content-Type': 'text/plain', 
+                    "Link": createLinks(1, 5)
+                }
+            );
+            res.end(storage.getOrders(1, 5) + '\n');
+        }
+        else {
+            res.writeHead(400);
+            res.end();
+        }
+    }
+    else if ((id = req.url.match('^/orders([?])page([=])([0-9]+)([&])limit([=])([0-9]+)'))) {
         if (req.method == 'GET') {
             var page = id[3],
                 limit = id[6];
